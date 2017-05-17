@@ -1,0 +1,4 @@
+templates/* linguist-vendored
+counter/templates/* linguist-vendored
+counter/static/* linguist-vendored
+components/* linguist-vendored
