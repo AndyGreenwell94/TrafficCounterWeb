@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}
+    Index
+{% endblock %}
+{% block links %}
+    {% load static %}
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            {% for camera in camera_list %}
+                <div class="col-lg-4 col-md-5 col-xs-12">
+                        <div class="thumbnail">
+                            <a href="{% url 'detail' camera.id %}" class="thumbnail-caption">
+                                <img src="{{ camera.img.url }}" style="min-height:200px;height:200px"/>
+                            </a>
+                            <div class="caption">
+                                <h4>{{ camera.name }}</h4> {% if camera.active_now %} <h5>Идет подсчет</h5> {% else %}<h5>Ожидание</h5>{% endif %}
+
+                                <p>
+                                {% if camera.active_tt %}
+                                    <h5 class="text-success ">Установленно {{ camera.active_tt }} расписаний</h5>
+                                {% else %}
+                                    <h5 class="text-danger ">Расписание не установленно</h5>
+                                {% endif %}
+
+                                </p>
+                                <p>
+                                    <a href = "{% url 'detail' camera.id %}" class = "btn btn-primary" role = "button">
+                                        К камере
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+            <div class="col-lg-4 col-md-5 col-xs-12">
+                <div class="thumbnail">
+                    <a href="/counter/cameras" class="thumbnail-caption">
+                        <img src="{% static 'counter/plus.png' %}" style="min-height:200px;height:200px"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

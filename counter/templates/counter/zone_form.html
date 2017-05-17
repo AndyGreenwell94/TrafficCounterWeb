@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Область {{ zone.name }}
+{% endblock %}
+{% block links %}
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+        <link href="//vjs.zencdn.net/5.0/video-js.min.css" rel="stylesheet">
+
+    <script src="//vjs.zencdn.net/5.0/video.min.js"></script>
+        <script type="text/javascript">
+  function draggablePolygon(polygon) {
+    var points = polygon.points;
+    var svgRoot = $(polygon).closest("svg");
+    var colors = ["#fdd460", "#df9441", "#f15c24", "#c10c03"]
+    for (var i = 0; i < points.numberOfItems; i++) {
+      (function (i) { // close over variables for drag call back
+        var point = points.getItem(i);
+
+        var handle = document.createElement("div");
+        handle.className = "handle";
+        document.getElementById("append").appendChild(handle);
+
+        var base = svgRoot.position();
+        // center handles over polygon
+            var cs = window.getComputedStyle(handle, null);
+        base.left = 6;
+        base.top = -9;
+              handle.style.background = colors[i]
+              handle.style.left = base.left + point.x + "px";
+              handle.style.top = base.top + point.y + "px";
+
+        $(handle).draggable({
+          drag: function (event) {
+            setTimeout(function () { // jQuery apparently calls this *before* setting position, so defer
+                if(parseInt(handle.style.left) - base.left > 0 && parseInt(handle.style.left) - base.left < {{ cam.width }}
+                && parseInt(handle.style.top) - base.top > 0 && parseInt(handle.style.top) - base.top < {{ cam.height }}){
+                point.x = parseInt(handle.style.left) - base.left;
+                point.y = parseInt(handle.style.top) - base.top;
+                for(var i = 0; i < 4; i++) {
+                    var edx = document.getElementById("id_x" + (i + 1));
+                    var edy = document.getElementById("id_y" + (i + 1));
+                    edx.value = parseInt((polygon.points.getItem(i).x * 2));
+                    edy.value = parseInt((polygon.points.getItem(i).y * 2));
+                }
+                }
+            },0);
+          },
+            containment: "parent"
+        });
+      }(i));
+    }
+
+  }
+function fillCoordinates(polygon){
+    for(var i = 0; i < 4; i++) {
+        var edx = document.getElementById("id_x"+(i+1));
+        var edy = document.getElementById("id_y"+(i+1));
+        edx.value = polygon.points.getItem(i).x;
+        edy.value = polygon.points.getItem(i).y;
+    }
+}
+  </script>
+    <style>
+    .handle {
+        position: absolute;
+        border: 0.15em solid #2a6032;
+        width: 0px;
+        height: 0px;
+        z-index: 3;
+        border-radius: 10px;
+        background: #68ad9d;
+        padding: 7px;
+    }
+    svg{
+        position: absolute;
+        z-index: 2 }
+    polygon{
+        stroke: #335180;
+        stroke-width:3px;
+    }
+    #really-cool-video {
+        position: absolute;
+        margin: 0;
+        z-index: 1;}
+        </style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+            <div class="col-lg-12">
+                <ul class="breadcrumb">
+                    <li><a href="{% url 'index' %}">Все камеры</a></li>
+                    {% if zone.name %}
+                    <li><a href="{% url 'detail' object.camera.id %}">{{ object.camera.name }}</a></li>
+                    <li class="active">{{object.name}}</li>
+                    {% else %}
+                    <li><a href="{% url 'detail' cam.id %}">{{ cam.name }}</a></li>
+                    <li class="active">Новая оласть</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+<div class="row">
+
+    <div  class="col-lg-6">
+        <div class="row">
+        <div class="col-lg-12">
+            <div  id="append" class="" style="height: {{ cam.height }}px; width: {{ cam.width }}px; background-image: url({{ cam.img.url }}); background-size:100%;">
+            <svg id="theSVG" width="{{ cam.width }}" height="{{ cam.height }}">
+                {% if form.x1.value or form.x2.value or form.x3.value or form.x4.value%}
+                    {% load mathfilters %}
+              <polygon id="x" points="{{ form.x1.value|intdiv:2 }},{{ form.y1.value|intdiv:2 }}
+                                      {{ form.x2.value|intdiv:2 }},{{ form.y2.value|intdiv:2 }}
+                                      {{ form.x3.value|intdiv:2 }},{{ form.y3.value|intdiv:2 }}
+                                      {{ form.x4.value|intdiv:2 }},{{ form.y4.value|intdiv:2 }}" fill="#2E9AFE" fill-opacity="0.2"/>
+                {% else %}
+              <polygon id="x" points="100,100
+                                      200,100
+                                      200,200
+                                      100,200" fill="#2E9AFE" fill-opacity="0.2"/>
+                {% endif %}
+
+            </svg>
+
+                <!--<video id="really-cool-video" poster="{{ cam.img.url }}" style="max-width:100%; max-height:100%;">
+                </video>-->
+            </div>
+        </div>
+        </div>
+        <script type="text/javascript">
+        draggablePolygon(document.getElementById("x"));
+      </script>
+    </div>
+    <div class="col-lg-5 col-lg-offset-1">
+    <form action="" method="post" class="form-horizontal">
+    {% csrf_token %}
+    {% load widget_tweaks %}
+            <fieldset>
+                <div class="form-group{% if form.name.errors %} has-error{% endif %}">
+                    <label for="id_name" class="col-lg-4 control-label">{{ form.name.help_text }}</label>
+                    <div class="col-lg-8">
+                        {% render_field form.name class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group{% if form.directions.errors %} has-error{% endif %}">
+                    <label for="id_directions" class="col-lg-4 control-label">{{ form.directions.help_text }}</label>
+                    <div class="col-lg-8">
+                        {% render_field form.directions class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group{% if form.dir1.errors %} has-error{% endif %}">
+                    <label for="id_width" class="col-lg-4 control-label">{{ form.dir1.help_text }}</label>
+                    <div class="col-lg-8">
+                        {% render_field form.dir1 class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group{% if form.dir2.errors %} has-error{% endif %}">
+                    <label for="id_height" class="col-lg-4 control-label">{{ form.dir2.help_text }}</label>
+                    <div class="col-lg-8">
+                        {% render_field form.dir2 class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group{% if form.x1.errors %} has-error{% endif %}">
+                <div class="handle ui-draggable ui-draggable-handle" style="bottom: auto; background: #fdd460;"></div>
+                    <label for="id_x1" class="col-lg-2 control-label">{{ form.x1.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.x1 class="form-control"%}
+                    </div>
+                    <label for="id_y1" class="col-lg-2 control-label">{{ form.y1.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.y1 class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group{% if form.x2.errors %} has-error{% endif %}">
+                <div class="handle ui-draggable ui-draggable-handle" style="bottom: auto; background: #df9441;"></div>
+                    <label for="id_x2" class="col-lg-2 control-label">{{ form.x2.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.x2 class="form-control"%}
+                    </div>
+                    <label for="id_y2" class="col-lg-2 control-label">{{ form.y2.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.y2 class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group{% if form.x3.errors %} has-error{% endif %}">
+                <div class="handle ui-draggable ui-draggable-handle" style="bottom: auto; background: #f15c24;"></div>
+                    <label for="id_x3" class="col-lg-2 control-label">{{ form.x3.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.x3 class="form-control"%}
+                    </div>
+                    <label for="id_y3" class="col-lg-2 control-label">{{ form.y3.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.y3 class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group{% if form.x4.errors %} has-error{% endif %}">
+                            <div class="handle ui-draggable ui-draggable-handle" style="bottom: auto; background: #c10c03;"></div>
+                    <label for="id_x4" class="col-lg-2 control-label">{{ form.x4.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.x4 class="form-control"%}
+                    </div>
+                    <label for="id_y4" class="col-lg-2 control-label">{{ form.y4.help_text }}</label>
+                    <div class="col-lg-4">
+                        {% render_field form.y4 class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-11 col-lg-offset-1 text-center">
+                        <button type="submit" value="Ок" class="btn btn-success">Сохранить</button>
+                            {% if object %}
+                        <a href="{% url 'zoneDelete' cam.id zone.id %}" class="btn btn-success">Удалить</a>
+                            {% endif %}
+                    </div>
+                </div>
+            </fieldset>
+    </form>
+    </div>
+</div>
+<div class="row">
+
+
+</div>
+{% endblock %}

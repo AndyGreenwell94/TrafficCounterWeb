@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}
+    {{ camera.name }}
+{% endblock %}
+{% block links %}
+    <script src="//vjs.zencdn.net/5.0/video.min.js"></script>
+    <link href="//vjs.zencdn.net/5.0/video-js.min.css" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    {% load static %}
+    {% load mathfilters %}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+
+<!-- (Optional) Latest compiled and minified JavaScript translation files -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/i18n/defaults-ru_RU.min.js"></script>
+    <script type="text/javascript" src="{% static 'moment/min/moment.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'moment/locale/ru.js' %}"></script>
+    <script type="text/javascript" src="{% static 'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css' %}" />
+    <style>
+    .video-js {padding-top: 56.25%}
+    .vjs-fullscreen {padding-top: 0px}
+    .scrollable-menu {
+    height: auto;
+    max-height: 400px;
+    overflow-x: hidden;
+}
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <ul class="breadcrumb">
+            <li><a href="{% url 'index' %}">Все камеры</a></li>
+            <li>{{ camera.name }}</li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+{% if camera %}
+{% load static %}
+    <div class="col-lg-7 col-md-12 col-sm-8 col-xs-12" name="Video"1>
+        <div  id="append" class="" style="height: {{ camera.height }}px; width: {{ camera.width }}px; background-image: url({{ camera.img.url }}); background-size:100%;">
+            <svg id="theSVG" width="{{ camera.width }}" height="{{ camera.height }}">
+                {% for zone in zones %}
+                    <polygon id="x" points="{{ zone.x1|intdiv:2 }},{{ zone.y1|intdiv:2 }}
+                                            {{ zone.x2|intdiv:2 }},{{ zone.y2|intdiv:2 }}
+                                            {{ zone.x3|intdiv:2 }},{{ zone.y3|intdiv:2 }}
+                                            {{ zone.x4|intdiv:2 }},{{ zone.y4|intdiv:2 }}"
+                             stroke="#335180" stroke-width="5"
+                             fill="#2E9AFE" fill-opacity="0.2"><title>{{ zone.name }}</title></polygon>
+                {% endfor %}
+
+            </svg>
+
+                <!--<video id="really-cool-video" poster="{{ cam.img.url }}" style="max-width:100%; max-height:100%;">
+                </video>-->
+            </div>
+    </div>
+    <div class="col-lg-5 col-md-4 col-sm-4 col-xs-12" name="ZoneList">
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="dropdown-1 col-lg-6">
+                <a  id='dd1' href="#" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">Области</a>
+                <ul class="dropdown-menu scrollable-menu">
+                    {% for zone in zones %}
+                        <li><a href="{% url 'zoneUpdate' camera.id zone.id%}">{{ zone.name }}</a></li>
+
+                    {% endfor %}
+                    <li class="divider"></li>
+                    <li><a href="{% url 'zoneCreate' camera.id%}"><span class="glyphicon glyphicon-plus"></span></a></li>
+                </ul>
+            </div>
+            <div class="dropdown-2 col-lg-6">
+                <a id='dd2' href="#" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">Настройки областей</a>
+                <ul class="dropdown-menu scrollable-menu">
+                    {% for zone in zones %}
+                        <li class="dropdown-header">{{ zone.name }}</li>
+                        {% for zo in zone.zoneoption_set.all %}
+                            <li><a href="{% url 'zoneopUpdate' camera.id zone.id zo.id%}">{{ zo.name }}</a></li>
+                        {% endfor %}
+                        <li><a href="{% url 'zoneopCreate' camera.id zone.id%}"><span class="glyphicon glyphicon-plus"></span></a></li>
+                        <li class="divider"></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+            <br>
+        <div class="row">
+            <div class="col-lg-12">
+                <a class="btn btn-primary btn-block" href="#">Результаты</a>
+            </div>
+        </div>
+            <br>
+        </div>
+</div>
+{% else %}
+<div class="col-lg-4 col-lg-offset-4">
+<p>No camera found</p>
+</div>
+{% endif %}
+</div>
+<br>
+<div class="row">
+    <div class="col-lg-12" name="TimeTabel">
+        <table class="table table-striped table-hover" style="width: 100%">
+            <thead>
+            <tr class="info text-centered">
+                <th>Время начала</th>
+                <th>Время конца</th>
+                <th>Статус</th>
+                <th>Длина интервала</th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for t in timet %}
+                <tr>
+                    <th>{{ t.time_s }}</th>
+                    <th>{{ t.time_e }}</th>
+                    <th>{{ t.status }}</th>
+                    <th>{{ t.interval_length }}</th>
+                    <th class="active text-center" onclick="window.location='{% url 'timetableUpdate' camera.id t.id %}'">
+                        <span class="glyphicon glyphicon-pencil" style="color: mediumseagreen"></span>
+                    </th>
+                    <form id="formtt{{ t.id }}" action="{% url 'timetableDelete' camera.id t.id %}" method="post">
+                        {% csrf_token %}
+                    <th class="active text-center" onclick="formtt{{ t.id }}.submit()">
+                        <span class="glyphicon glyphicon-minus" style="color: red"></span>
+                    </th>
+                    </form>
+                </tr>
+            {% endfor %}
+            <tr class="success">
+                <th colspan="6" class="text-center" onclick="window.location='{% url 'timetableCreate' camera.id %}'">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

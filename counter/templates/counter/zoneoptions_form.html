@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}
+    Настрока области
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <ul class="breadcrumb">
+            <li><a href="{% url 'index' %}">Все камеры</a></li>
+            <li><a href="{% url 'detail' cam.id %}">{{ cam.name }}</a></li>
+            <li>Настройка областей</li>
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <form action="" method="post" class="form-horizontal">
+            {% csrf_token %}
+            {% load widget_tweaks %}
+            <fieldset>
+                <div class="form-group">
+                    <label for="id_name" class="col-lg-2">Имя настроек</label>
+                    <div class="col-lg-10">
+                        {% render_field form.name class="form-control"%}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_min_object_area" class="col-lg-2">Минимальный размер объекта</label>
+                    <div class="col-lg-4">
+                        {% render_field form.min_object_area class="form-control" %}
+                    </div>
+                    <label for="id_max_object_area" class="col-lg-2">Максимальный размер объекта</label>
+                    <div class="col-lg-4">
+                        {% render_field form.max_object_area class="form-control" %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_rad" class="col-lg-2">Расстояние между машинами</label>
+                    <div class="col-lg-4">
+                        {% render_field form.rad class="form-control" %}
+                    </div>
+                    <label for="id_set_rad" class="col-lg-2">Радиус расширения области</label>
+                    <div class="col-lg-4">
+                        {% render_field form.set_rad class="form-control" %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_blur" class="col-lg-2"> Размытие</label>
+                    <div class="col-lg-4">
+                        {% render_field form.blur class="form-control" %}
+                    </div>
+                    <label for="id_sensitivity" class="col-lg-2">чувствительность</label>
+                    <div class="col-lg-4">
+                        {% render_field form.sensitivity class="form-control" %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-11 col-lg-offset-1 text-center">
+                        <input type="submit" value="Сохранить"  class="btn btn-success"/>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        {% if object %}
+        <a href="{% url 'zoneopDelete' cam.id object.zone_id object.id %}"></a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

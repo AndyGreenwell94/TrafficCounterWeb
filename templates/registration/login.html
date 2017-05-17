@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}
+    Авторизация
+{% endblock %}
+{% block content %}
+<div class="row">
+<div class="col-lg-4 col-lg-offset-4">
+    {% load widget_tweaks %}
+        <form action='' method="post" class="form-horizontal">
+            {% csrf_token %}
+            <fieldset>
+                <legend class="text-center">Авторизация</legend>
+                <div class="form-group">
+                    <label for="inputUsername" class="col-lg-3 control-label">Логин</label>
+                    <div class="col-lg-9">
+                        {% render_field form.username class="form-control" placeholder="Имя пользователя" id="inputUsername"%}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPass" class="col-lg-3 control-label">Пароль</label>
+                    <div class="col-lg-9">
+                        {% render_field form.password class="form-control" placeholder="Пароль" id="inputPass"%}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-9 col-lg-offset-3">
+                        <button type="submit" value="Log in" class="btn btn-primary">Войти</button>
+                        <button type="reset" class="btn btn-default">Отмена</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+{% endblock %}
